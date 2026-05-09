@@ -1,0 +1,10 @@
+transformers
+datasets
+evaluate
+accelerate
+torch
+scikit-learn
+pandas
+numpy
+gradio
+pyyaml
