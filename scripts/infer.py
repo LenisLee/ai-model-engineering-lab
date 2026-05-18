@@ -1,31 +1,27 @@
+"""Run inference on input texts using a trained model."""
+
+import argparse
 import sys
-import yaml
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+from ai_model_engineering_lab.pipelines.inference import InferencePipeline
 
 
 def main():
-    with open("configs/base/config.yaml") as f:
-        cfg = yaml.safe_load(f)
+    parser = argparse.ArgumentParser(description="Run inference")
+    parser.add_argument("--model", default="outputs/checkpoints", help="Path to model directory")
+    parser.add_argument("texts", nargs="*", help="Texts to classify")
+    args = parser.parse_args()
 
-    train_cfg = cfg["training"]
-    model = AutoModelForSequenceClassification.from_pretrained(train_cfg["output_dir"])
-    tokenizer = AutoTokenizer.from_pretrained(train_cfg["output_dir"])
-    model.eval()
+    texts = args.texts if args.texts else [input("Text: ").strip()]
+    if not texts[0]:
+        print("No input text provided.")
+        sys.exit(1)
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model.to(device)
+    pipeline = InferencePipeline(args.model)
+    results = pipeline.run(texts)
 
-    texts = sys.argv[1:] if len(sys.argv) > 1 else [input("Text: ")]
-    inputs = tokenizer(texts, truncation=True, padding=True, return_tensors="pt").to(device)
-
-    with torch.no_grad():
-        logits = model(**inputs).logits
-        preds = logits.argmax(dim=-1)
-
-    id2label = model.config.id2label
-    for text, pred in zip(texts, preds):
-        print(f"{text[:60]:<60} -> {id2label[pred.item()]}")
+    for r in results:
+        print(f"{r['text'][:60]:<60} -> label={r['label']}, probs={r['probabilities']}")
 
 
 if __name__ == "__main__":
