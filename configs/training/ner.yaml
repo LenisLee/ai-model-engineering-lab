@@ -1,0 +1,15 @@
+project:
+  name: ai-model-engineering-lab
+
+data:
+  dataset_name: plod
+  eval_split: validation
+
+model:
+  base_model: bert-base-uncased
+
+training:
+  output_dir: outputs/checkpoints/ner
+  epochs: 5
+  batch_size: 16
+  learning_rate: 0.00002

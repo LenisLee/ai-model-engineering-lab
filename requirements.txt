@@ -8,3 +8,8 @@ pandas
 numpy
 gradio
 pyyaml
+matplotlib
+seaborn
+scikit-learn
+seqeval
+mlflow

@@ -61,8 +61,23 @@ class TrainingPipeline:
             compute_metrics=make_compute_metrics_fn(),
         )
 
+        # Optional MLflow tracking
+        tracker = None
+        if self.train_cfg.get("mlflow_tracking", False):
+            from ai_model_engineering_lab.training.tracker import ExperimentTracker
+            tracker = ExperimentTracker()
+            if tracker.start_run(run_name=f"{self.model_cfg.get('base_model')}_{self.data_cfg.get('dataset_name')}"):
+                tracker.log_params(self.config)
+                self.logger.info("MLflow tracking enabled")
+
         train_metrics = trainer.train()
         eval_metrics = trainer.evaluate()
+
+        if tracker:
+            for k, v in eval_metrics.items():
+                if isinstance(v, (int, float)):
+                    tracker.log_metrics({k: v})
+            tracker.end_run()
 
         trainer.save()
         self.logger.info(f"Model saved to {self.train_cfg.get('output_dir', 'outputs/checkpoints')}")
