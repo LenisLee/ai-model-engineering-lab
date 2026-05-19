@@ -29,12 +29,13 @@ class TrainingPipeline:
         self.logger.info("Loading dataset ...")
         ds = self._load_data()
 
+        eval_split = self.data_cfg.get("eval_split", "test")
         max_train = self.data_cfg.get("max_train_samples")
         max_eval = self.data_cfg.get("max_eval_samples")
         if max_train:
             ds["train"] = ds["train"].shuffle(seed=42).select(range(min(max_train, len(ds["train"]))))
-        if max_eval and "test" in ds:
-            ds["test"] = ds["test"].shuffle(seed=42).select(range(min(max_eval, len(ds["test"]))))
+        if max_eval and eval_split in ds:
+            ds[eval_split] = ds[eval_split].shuffle(seed=42).select(range(min(max_eval, len(ds[eval_split]))))
 
         for split_name, split_ds in ds.items():
             self.logger.info(f"  {split_name}: {len(split_ds)} samples")
@@ -56,7 +57,7 @@ class TrainingPipeline:
             config=self.config,
             model=model,
             train_dataset=tokenized_ds["train"],
-            eval_dataset=tokenized_ds.get("test"),
+            eval_dataset=tokenized_ds.get(eval_split),
             compute_metrics=make_compute_metrics_fn(),
         )
 
