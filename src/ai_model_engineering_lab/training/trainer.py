@@ -41,12 +41,10 @@ class HFTrainer:
             per_device_eval_batch_size=train_cfg.get("batch_size", 8),
             learning_rate=train_cfg.get("learning_rate", 2e-5),
             weight_decay=train_cfg.get("weight_decay", 0.01),
-            warmup_ratio=train_cfg.get("warmup_ratio", 0.0),
-            evaluation_strategy=train_cfg.get("evaluation_strategy", "epoch"),
+            eval_strategy=train_cfg.get("eval_strategy", "epoch"),
             save_strategy=train_cfg.get("save_strategy", "epoch"),
             load_best_model_at_end=train_cfg.get("load_best_model_at_end", True),
             metric_for_best_model=train_cfg.get("metric_for_best_model", "eval_loss"),
-            logging_dir=train_cfg.get("logging_dir", "outputs/logs"),
             logging_steps=train_cfg.get("logging_steps", 100),
             fp16=train_cfg.get("fp16", torch.cuda.is_available()),
             dataloader_num_workers=train_cfg.get("num_workers", 0),
@@ -57,7 +55,7 @@ class HFTrainer:
             args=self.args,
             train_dataset=self.train_dataset,
             eval_dataset=self.eval_dataset,
-            tokenizer=self.tokenizer,
+            processing_class=self.tokenizer,
             compute_metrics=self.compute_metrics,
         )
 

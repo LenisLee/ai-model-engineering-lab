@@ -28,6 +28,17 @@ class TrainingPipeline:
     def run(self) -> Dict[str, Any]:
         self.logger.info("Loading dataset ...")
         ds = self._load_data()
+
+        max_train = self.data_cfg.get("max_train_samples")
+        max_eval = self.data_cfg.get("max_eval_samples")
+        if max_train:
+            ds["train"] = ds["train"].shuffle(seed=42).select(range(min(max_train, len(ds["train"]))))
+        if max_eval and "test" in ds:
+            ds["test"] = ds["test"].shuffle(seed=42).select(range(min(max_eval, len(ds["test"]))))
+
+        for split_name, split_ds in ds.items():
+            self.logger.info(f"  {split_name}: {len(split_ds)} samples")
+
         num_labels = self._infer_num_labels(ds)
 
         self.logger.info(f"Creating model '{self.model_cfg.get('base_model')}' with {num_labels} labels ...")

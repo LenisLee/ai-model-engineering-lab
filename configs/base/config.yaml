@@ -5,6 +5,8 @@ data:
   dataset_name: imdb
   text_column: text
   label_column: label
+  max_train_samples: 2000
+  max_eval_samples: 500
 
 model:
   base_model: distilbert-base-uncased
@@ -13,4 +15,4 @@ training:
   output_dir: outputs/checkpoints
   epochs: 1
   batch_size: 8
-  learning_rate: 2e-5
+  learning_rate: 0.00002
